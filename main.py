@@ -1,30 +1,22 @@
 from machine import Pin, TouchPad
 from time import ticks_ms, sleep_ms, time
 import time
-"""
-from redLight import *
-from yellowLight import *
-from greenLight import *
-"""
-touch_pin_gul = TouchPad(Pin(4))
-#touch_pin_grøn = TouchPad(Pin(5))
-#touch_pin_rød = TouchPad(Pin(16))
+import neopixel
+import lightAnimations
+
+touch_pin_green = TouchPad(Pin(2))
+touch_pin_yellow = TouchPad(Pin(4))
+touch_pin_red = TouchPad(Pin(12))
 
 while True:
-    if (touch_pin_gul.read() < 200):
-        from yellowLight import *
-    #if (touch_pin_rød.read() < 200):
-    #    from redLight import *
-    #if (touch_pin_grøn.read() < 200):
-    #    from greenLight import *
-"""
-if val == 1:
-    print("Starter det grønne lys")
-    from greenLight import *
-if val == 2:
-    print("Starter det gule lys")
-    from yellowLight import *
-if val == 3:
-    print("Starter det røde lys")
-    from redLight import *
-    """
+    if (touch_pin_green.read() < 200):
+        lightAnimations.greenCycle(0, 255, 0, 125)
+        lightAnimations.clear()
+    elif (touch_pin_yellow.read() < 200):
+        lightAnimations.yellowCycle(255, 155, 0, 125)
+        lightAnimations.clear()
+    elif (touch_pin_red.read() < 200):
+        lightAnimations.redCycle(255, 0, 0, 125)
+        lightAnimations.clear()
+
+
