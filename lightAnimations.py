@@ -39,3 +39,12 @@ def redCycle(r, g, b, wait):
     np[i % n] = (r, g, b)
     np.write()
     time.sleep_ms(wait)
+
+# offline status
+def offline(r, g, b, wait):
+  for i in range(1 * n):
+    for j in range(n):
+      np[j] = (1, 1, 1)
+    np[i % n] = (r, g, b)
+    np.write()
+    time.sleep_ms(wait)
