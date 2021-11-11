@@ -12,7 +12,7 @@ while True:
 
     print("it be moistn or wet",sensor_val)
 
-    sleep(0.1)
+    sleep(0.25)
 
-    
+
 
