@@ -1,14 +1,20 @@
 from machine import Pin
-from time import ticks_ms, sleep_ms
-#import wifiConnect
+from time import ticks_ms, sleep_ms, sleep
+import credentials
+import umqtt_robust2
+import GPSfunk
 import neopixel, dht
 import lightAnimations
-#lib = wifiConnect
+lib = umqtt_robust2
 
 dht11_interval = 2000
 dht11_state = 0
 dht11_previousTime = 0
 sensor = dht.DHT11(Pin(26))
+
+mapFeed = bytes('{:s}/feeds/{:s}'.format(b'Anas0418', b'mapfeed/csv'), 'utf-8')
+# opret en ny feed kaldet speed_gps indo på io.adafruit
+speedFeed = bytes('{:s}/feeds/{:s}'.format(b'Anas0418', b'speedfeed/csv'), 'utf-8')
 
 while True:
     current_time = ticks_ms()
@@ -28,12 +34,58 @@ while True:
         elif (temp < 40 and hum < 100):
             lightAnimations.redCycle(255, 0, 0, 50)
             print("Lys: Red")
-    """
-    elif (touch_pin_yellow.read() < 200):
-        lightAnimations.yellowCycle(255, 155, 0, 50)
-    elif (touch_pin_red.read() < 200):
-        lightAnimations.redCycle(255, 0, 0, 50)
-    else:
-        lightAnimations.offline(2, 2, 2, 50)
-        """
+        if lib.c.is_conn_issue():
+            while lib.c.is_conn_issue():
+                #hvis der forbindes returnere is_conn_issue metoden ingen fejlmeddelse
+                lib.c.reconnect()
+            else:
+                lib.c.resubscribe()
+        try:
+            lib.c.publish(topic=mapFeed, msg=GPSfunk.main())
+            speed = GPSfunk.main()
+            speed = speed[:4]
+            print("speed: ",speed)
+            lib.c.publish(topic=speedFeed, msg=speed)
+            sleep(10) 
+        except KeyboardInterrupt:
+            print('Ctrl-C pressed...exiting')
+            lib.c.disconnect()
+            lib.wifi.active(False)
+            lib.sys.exit()
+"""
+mapFeed = bytes('{:s}/feeds/{:s}'.format(b'Anas0418', b'mapfeed/csv'), 'utf-8')
+# opret en ny feed kaldet speed_gps indo på io.adafruit
+speedFeed = bytes('{:s}/feeds/{:s}'.format(b'Anas0418', b'speedfeed/csv'), 'utf-8')
 
+while True:
+    if lib.c.is_conn_issue():
+        while lib.c.is_conn_issue():
+            # hvis der forbindes returnere is_conn_issue metoden ingen fejlmeddelse
+            lib.c.reconnect()
+        else:
+            lib.c.resubscribe()
+    try:
+        lib.c.publish(topic=mapFeed, msg=GPSfunk.main())
+        speed = GPSfunk.main()
+        speed = speed[:4]
+        print("speed: ",speed)
+        lib.c.publish(topic=speedFeed, msg=speed)
+        sleep(10) 
+    # Stopper programmet når der trykkes Ctrl + c
+    except KeyboardInterrupt:
+        print('Ctrl-C pressed...exiting')
+        lib.c.disconnect()
+        lib.wifi.active(False)
+        lib.sys.exit()
+    except OSError as e:
+        print('Failed to read sensor.')
+    except NameError as e:
+        print('NameError')
+    except TypeError as e:
+        print('TypeError')
+    lib.c.check_msg() # needed when publish(qos=1), ping(), subscribe()
+    lib.c.send_queue()  # needed when using the caching capabilities for unsent messages
+
+lib.c.disconnect()
+
+"""
