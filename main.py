@@ -5,6 +5,8 @@ from machine import Pin
 from time import ticks_ms, sleep_ms, sleep
 import neopixel, dht
 import lightAnimations
+import buzzer
+import _thread
 lib = umqtt_robust2
 
 dht11_interval = 2000
@@ -38,11 +40,13 @@ while True:
             print("Lys: Yellow")
         elif (temp < 40 and hum < 100):
             lightAnimations.redCycle(255, 0, 0, 50)
+            _thread.start_new_thread(buzzOn, (10,))
             print("Lys: Red")
         if lib.c.is_conn_issue():
             while lib.c.is_conn_issue():
                 #hvis der forbindes returnere is_conn_issue metoden ingen fejlmeddelse
                 lib.c.reconnect()
+                print("reconnect")
             else:
                 lib.c.resubscribe()
         try:
