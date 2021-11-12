@@ -1,8 +1,8 @@
-from machine import Pin
-from time import ticks_ms, sleep_ms, sleep
 import credentials
 import umqtt_robust2
 import GPSfunk
+from machine import Pin
+from time import ticks_ms, sleep_ms, sleep
 import neopixel, dht
 import lightAnimations
 lib = umqtt_robust2
@@ -10,11 +10,16 @@ lib = umqtt_robust2
 dht11_interval = 2000
 dht11_state = 0
 dht11_previousTime = 0
+preivousTemp = 0
+intervalTemp = 10000
 sensor = dht.DHT11(Pin(26))
 
 mapFeed = bytes('{:s}/feeds/{:s}'.format(b'Anas0418', b'mapfeed/csv'), 'utf-8')
 # opret en ny feed kaldet speed_gps indo på io.adafruit
 speedFeed = bytes('{:s}/feeds/{:s}'.format(b'Anas0418', b'speedfeed/csv'), 'utf-8')
+temperatureFeed = bytes('{:s}/feeds/{:s}'.format(b'Anas0418', b'temperaturefeed/csv'), 'utf-8')
+# opret en ny feed kaldet speed_gps indo på io.adafruit
+humidityFeed = bytes('{:s}/feeds/{:s}'.format(b'Anas0418', b'humidityfeed/csv'), 'utf-8')
 
 while True:
     current_time = ticks_ms()
@@ -44,9 +49,18 @@ while True:
             lib.c.publish(topic=mapFeed, msg=GPSfunk.main())
             speed = GPSfunk.main()
             speed = speed[:4]
-            print("speed: ",speed)
-            lib.c.publish(topic=speedFeed, msg=speed)
-            sleep(10) 
+            print("speed: ", speed)
+            lib.c.publish(topic=speedFeed, msg=str(speed))
+            
+            currentTime = ticks_ms()
+            if currentTime - preivousTemp > intervalTemp:
+                preivousTemp = currentTime
+                lib.c.publish(topic= temperatureFeed, msg=str(temp))
+                print("temp: ", temp)
+                lib.c.publish(topic=humidityFeed, msg=str(hum))
+                print("hum:", hum)
+            
+            
         except KeyboardInterrupt:
             print('Ctrl-C pressed...exiting')
             lib.c.disconnect()
