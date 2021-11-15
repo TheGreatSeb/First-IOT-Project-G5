@@ -35,21 +35,22 @@ while True:
         print("temperature: %3.1f C" % temp)
         print("Hum: %3.1f" %  hum)
         if (temp < 25 and hum < 60):
-            #_thread.start_new_thread(lightAnimations.clear, ())
+            _thread.start_new_thread(lightAnimations.clear, ())
             redon = 0
             buzzer.set_buzbuz_off()
             lightAnimations.clear
             print("Lys: Clear")
         elif (temp < 30 and hum < 70):
-            #_thread.start_new_thread(lightAnimations.yellowCycle, (255, 155, 0, 50))
+            _thread.start_new_thread(lightAnimations.yellowCycle, (255, 155, 0, 50))
             redon = 0
             buzzer.set_buzbuz_off()
             print("Lys: Yellow")
-        elif (temp < 40 and hum < 90):
-            #_thread.start_new_thread(lightAnimations.redCycle, (255, 0, 0, 50))
+        elif (temp < 40 and hum < 100):
+            _thread.start_new_thread(lightAnimations.redCycle, (255, 0, 0, 50))
             if redon == 0:
                 buzzer.set_buzbuz_on()
-                time.sleep(1):
+                time.sleep(1)
+                buzzer.set_buzbuz_off()
                 redon = 1
             print("Lys: Red")
         if lib.c.is_conn_issue():
