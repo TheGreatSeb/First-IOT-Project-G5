@@ -1,20 +1,23 @@
 import credentials
 import umqtt_robust2
 import GPSfunk
-from machine import Pin
+from machine import Pin, PWM
 from time import ticks_ms, sleep_ms, sleep
+import time
 import neopixel, dht
 import lightAnimations
 import buzzer
 import _thread
 lib = umqtt_robust2
 
-dht11_interval = 2000
+dht11_interval = 15000
 dht11_state = 0
 dht11_previousTime = 0
 preivousTemp = 0
 intervalTemp = 10000
 sensor = dht.DHT11(Pin(26))
+
+buzbuz = (Pin(14), Machine.Pin.OUT)
 
 mapFeed = bytes('{:s}/feeds/{:s}'.format(b'Anas0418', b'mapfeed/csv'), 'utf-8')
 # opret en ny feed kaldet speed_gps indo på io.adafruit
@@ -33,14 +36,17 @@ while True:
         print("temperature: %3.1f C" % temp)
         print("Hum: %3.1f" %  hum)
         if (temp < 25 and hum < 60):
-            lightAnimations.clear
+            _thread.start_new_thread(lightAnimations.clear, ())
+            buzzer.buzbuz(0)
+            #lightAnimations.clear
             print("Lys: Clear")
         elif (temp < 30 and hum < 70):
-            lightAnimations.yellowCycle(255, 155, 0, 50)
+            _thread.start_new_thread(lightAnimations.yellowCycle, (255, 155, 0, 50))
+            buzzer.buzbuz(0)
             print("Lys: Yellow")
-        elif (temp < 40 and hum < 100):
-            lightAnimations.redCycle(255, 0, 0, 50)
-            _thread.start_new_thread(buzzOn, (10,))
+        elif (temp < 40 and hum < 90):
+            _thread.start_new_thread(lightAnimations.redCycle, (255, 0, 0, 50))
+            buzzer.buzbuz(1)
             print("Lys: Red")
         if lib.c.is_conn_issue():
             while lib.c.is_conn_issue():
@@ -70,3 +76,6 @@ while True:
             lib.c.disconnect()
             lib.wifi.active(False)
             lib.sys.exit()
+
+
+
