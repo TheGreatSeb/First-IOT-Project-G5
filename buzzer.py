@@ -1,9 +1,11 @@
 from machine import Pin
+import time
 
-buzbuz = (Pin(14), Pin.OUT)
+buzbuz = Pin(14, Pin.OUT)
 
-def buzbuz(s):
-    if s == 1:
-        buzbuz.value(1)
-    else:
-        buzbuz.value(0)
+def set_buzbuz_on():
+    buzbuz.value(1)
+    print("BUZZ ONNN")
+def set_buzbuz_off():
+    buzbuz.value(0)
+
