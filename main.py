@@ -1,7 +1,7 @@
 import credentials
 import umqtt_robust2
 import GPSfunk
-from machine import Pin, PWM
+from machine import Pin
 from time import ticks_ms, sleep_ms, sleep
 import time
 import neopixel, dht
@@ -16,8 +16,7 @@ dht11_previousTime = 0
 preivousTemp = 0
 intervalTemp = 10000
 sensor = dht.DHT11(Pin(26))
-
-buzbuz = (Pin(14), Machine.Pin.OUT)
+redon = 0
 
 mapFeed = bytes('{:s}/feeds/{:s}'.format(b'Anas0418', b'mapfeed/csv'), 'utf-8')
 # opret en ny feed kaldet speed_gps indo på io.adafruit
@@ -36,17 +35,22 @@ while True:
         print("temperature: %3.1f C" % temp)
         print("Hum: %3.1f" %  hum)
         if (temp < 25 and hum < 60):
-            _thread.start_new_thread(lightAnimations.clear, ())
-            buzzer.buzbuz(0)
-            #lightAnimations.clear
+            #_thread.start_new_thread(lightAnimations.clear, ())
+            redon = 0
+            buzzer.set_buzbuz_off()
+            lightAnimations.clear
             print("Lys: Clear")
         elif (temp < 30 and hum < 70):
-            _thread.start_new_thread(lightAnimations.yellowCycle, (255, 155, 0, 50))
-            buzzer.buzbuz(0)
+            #_thread.start_new_thread(lightAnimations.yellowCycle, (255, 155, 0, 50))
+            redon = 0
+            buzzer.set_buzbuz_off()
             print("Lys: Yellow")
         elif (temp < 40 and hum < 90):
-            _thread.start_new_thread(lightAnimations.redCycle, (255, 0, 0, 50))
-            buzzer.buzbuz(1)
+            #_thread.start_new_thread(lightAnimations.redCycle, (255, 0, 0, 50))
+            if redon == 0:
+                buzzer.set_buzbuz_on()
+                time.sleep(1):
+                redon = 1
             print("Lys: Red")
         if lib.c.is_conn_issue():
             while lib.c.is_conn_issue():
@@ -72,10 +76,8 @@ while True:
             
             
         except KeyboardInterrupt:
+            buzzer.set_buzbuz_off()
             print('Ctrl-C pressed...exiting')
             lib.c.disconnect()
             lib.wifi.active(False)
             lib.sys.exit()
-
-
-
